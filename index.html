@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AzeX Games</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --bg:#06101a;
+      --bg2:#0b1627;
+      --card:#0f1d35;
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#9aa8bf;
+      --accent:#5b8cff;
+      --accent2:#8b5cff;
+      --radius:22px;
+      --shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(91,140,255,.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(139,92,255,.16), transparent 24%),
+        linear-gradient(180deg, #040812 0%, var(--bg) 55%, #071018 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    img{display:block;max-width:100%}
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(18px);
+      background:linear-gradient(180deg, rgba(4,8,18,.94), rgba(4,8,18,.72));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .topbar{
+      width:min(1400px, calc(100% - 20px));
+      margin:0 auto;
+      padding:12px 0;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      font-size:25px;
+      font-weight:900;
+      letter-spacing:-.04em;
+      color:#fff;
+      flex:0 0 auto;
+    }
+    .logo span{color:var(--accent)}
+    .search{
+      flex:1;
+      min-width:0;
+      height:46px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,18,31,.84);
+      color:var(--text);
+      padding:0 16px;
+      outline:none;
+      box-shadow:0 8px 24px rgba(0,0,0,.12);
+    }
+    .search::placeholder{color:#8ea0bd}
+    .search:focus,.sort:focus,.cat:focus,.btn:focus{
+      border-color:rgba(91,140,255,.55);
+      box-shadow:0 0 0 4px rgba(91,140,255,.14);
+    }
+
+    main{
+      width:min(1400px, calc(100% - 20px));
+      margin:0 auto;
+      padding:14px 0 30px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin:0 0 14px;
+    }
+    .left-tools,.right-tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .cat,.sort{
+      height:42px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(10,18,31,.84);
+      color:var(--text);
+      padding:0 14px;
+      cursor:pointer;
+      transition:.22s ease;
+    }
+    .cat:hover,.sort:hover{transform:translateY(-1px)}
+    .cat.active{
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color:transparent;
+      box-shadow:0 12px 28px rgba(91,140,255,.18);
+    }
+
+    .section-head{
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:12px;
+      margin:6px 0 16px;
+    }
+    .section-head h2{margin:0;font-size:22px}
+    #count{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 20px; 
+    }
+
+   
+    
+    .game{
+      position:relative;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(15,29,53,.94), rgba(8,15,28,.98));
+      color:inherit;
+      text-align:left;
+      cursor:pointer;
+      overflow:hidden;
+      padding:12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.18);
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease, filter .22s ease;
+      will-change:transform;
+    }
+    .game::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      background:linear-gradient(135deg, rgba(91,140,255,.0), rgba(91,140,255,.18), rgba(139,92,255,.0));
+      opacity:0;
+      transition:opacity .22s ease;
+      pointer-events:none;
+    }
+    .game:hover{
+      transform:translateY(-7px) scale(1.02);
+      border-color:rgba(91,140,255,.42);
+      box-shadow:0 22px 54px rgba(0,0,0,.38), 0 0 30px rgba(91,140,255,.12);
+      filter:saturate(1.05);
+    }
+    .game:hover::before{opacity:1}
+    .cover {
+     aspect-ratio: 4 / 3; /* 16/10 dan 4/3 ga o'zgartirildi - rasm balandroq va kattaroq bo'ladi */
+     border-radius: 18px;
+     background: 
+       radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 28%),
+       linear-gradient(135deg, rgba(91,140,255,.18), rgba(139,92,255,.14));
+     display: grid;
+     place-items: center;
+     overflow: hidden;
+     position: relative;
+     margin-bottom: 12px;
+     width: 100%; /* To'liq kenglikni egallashi uchun */
+     }
+
+    .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Rasm cho'zilmasdan, qutini to'liq to'ldiradi */
+    position: absolute;
+    inset: 0;
+    transition: transform .3s ease; /* Hoverda effekt uchun */
+    }
+
+    /* Rasmga sichqoncha borganda biroz yaqinlashish effekti */
+   .game:hover .cover img {
+    transform: scale(1.05);
+    }
+
+    .emoji{
+      font-size:40px;
+      transition:transform .22s ease;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.24));
+    }
+    .game:hover .emoji{transform:scale(1.08) rotate(-3deg)}
+    .game h3 {
+    font-size: 17px; /* 15px dan 17px ga */
+    margin: 0 0 6px;
+    line-height: 1.4;
+    min-height: 48px; /* Matnlar tekis turishi uchun balandlik oshirildi */
+    }
+
+    .game p {
+     margin: 0;
+     color: var(--muted);
+     font-size: 14px; /* 13px dan 14px ga */
+       }
+
+    .empty{
+      margin:18px 0 0;
+      padding:18px;
+      border-radius:18px;
+      border:1px dashed rgba(255,255,255,.14);
+      color:var(--muted);
+      text-align:center;
+      background:rgba(255,255,255,.02);
+    }
+
+    footer{
+      width:min(1400px, calc(100% - 20px));
+      margin:0 auto;
+      padding:22px 0 28px;
+      color:var(--muted);
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:50;
+      background:rgba(3,7,15,.78);
+      backdrop-filter:blur(16px);
+    }
+    .modal[hidden]{display:none}
+    .panel{
+      width:min(1240px, calc(100% - 18px));
+      height:min(92vh, 920px);
+      margin:4vh auto 0;
+      border-radius:24px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(11,20,36,.98), rgba(7,13,24,.99));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 30px 80px rgba(0,0,0,.5);
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+    }
+    .bar{
+      padding:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .bar button{
+      height:42px;
+      padding:0 14px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      cursor:pointer;
+    }
+    #gameName{
+      flex:1;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .stage{
+      min-height:300px;
+      background:#000;
+    }
+    iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      background:#000;
+    }
+    .info{
+      padding:16px 18px 18px;
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+    .info h2{margin:0 0 8px;font-size:18px}
+    .info p{margin:0;color:var(--muted);line-height:1.6}
+
+    @media (max-width: 900px){
+      .grid{grid-template-columns:repeat(auto-fill, minmax(180px, 1fr))}
+    }
+    @media (max-width: 640px){
+      .topbar{padding:10px 0;flex-wrap:wrap}
+      .logo{font-size:22px}
+      .search{flex-basis:100%;height:44px}
+      .toolbar{gap:8px}
+      .cat,.sort{height:40px;font-size:13px}
+      .grid{grid-template-columns:repeat(2, minmax(0,1fr));gap:10px}
+      .game{padding:10px;border-radius:18px}
+      .game h3{font-size:13px;min-height:34px}
+      .emoji{font-size:32px}
+      .panel{width:100%;height:100vh;margin:0;border-radius:0}
+      .stage{min-height:45vh}
+      .section-head h2{font-size:19px}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <a href="#" class="logo" id="home">Aze<span>X</span></a>
+    <input id="search" class="search" type="search" placeholder="O‘yin qidirish..." />
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="left-tools" id="categories">
+      <button class="cat active" data-cat="All">Barcha o‘yinlar</button>
+      <button class="cat" data-cat="Adventure">Adventure</button>
+      <button class="cat" data-cat="Puzzle">Puzzle</button>
+      <button class="cat" data-cat="Action">Action</button>
+      <button class="cat" data-cat="Racing">Racing</button>
+      <button class="cat" data-cat="Casual">Casual</button>
+    </div>
+    <div class="right-tools">
+      <select id="sort" class="sort">
+        <option value="popular">Mashhur</option>
+        <option value="az">A-Z</option>
+        <option value="new">Yangi</option>
+      </select>
+    </div>
+  </div>
+
+  <section class="section-head">
+    <div>
+      <h2 id="heading">Mashhur o‘yinlar</h2>
+      <p id="count"></p>
+    </div>
+  </section>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>O‘yin topilmadi.</div>
+</main>
+
+<footer>© <span id="year"></span> AzeX Games</footer>
+
+<section class="modal" id="modal" hidden>
+  <div class="panel">
+    <div class="bar">
+      <button id="back">← Orqaga</button>
+      <div id="gameName">O‘yin</div>
+      <button id="full">⛶</button>
+      <button id="close">✕</button>
+    </div>
+    <div class="stage">
+      <iframe id="frame" title="AzeX game" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+    </div>
+    <div class="info">
+      <h2 id="infoTitle"></h2>
+      <p id="infoDesc"></p>
+      <p id="infoIns" style="margin-top:10px"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+const MY_PUBLISHER_ID = "4319870";
+
+const GAMES = [
+  {
+    id: "86384",
+    title: "Bike Obby Draw Pencil",
+    category: "Adventure",
+    icon: "🏍️",
+    thumbnail: "https://img.gamemonetize.com/y6wq6n3z1bh9xf8lorl7uve5sz2d2uha/512x384.jpg",
+    description: "Use your creativity and reflexes to complete the missing paths in 3D Side Platform Obby Draw Pencil! Draw paths with your pencil across the gaps between platforms to help your character move forward safely.",
+    instructions: "Jump with W and move left and right using the A and D keys. Mobile touch controls are also available.",
+    file: "https://html5.gamemonetize.co/y6wq6n3z1bh9xf8lorl7uve5sz2d2uha/",
+    popular: 100,
+    added: "2026-10-14"
+  },
+  {
+    id: "86551",
+    title: "Collect Brainrot Arena",
+    category:"Action",
+    icon: "",
+    thumbnail: "https://img.gamemonetize.com/3d46x6qf4gjpq9nn4u1wntkd2a35uor8/512x384.jpg",
+    description: "Collect Brainrot Arena is a chaotic multiplayer collecting and stealing game where luck, strategy, and timing are equally important. Enter the arena, gather valuable Lucky Blocks, unlock rare Brainrots, upgrade your collection, and protect your base from rival thieves. Every Lucky Block can contain a surprise, and every opponent is looking for an opportunity to steal your most valuable Brainrots.",
+    instructions: "Player 1 Move W A S D Jump Space Buy or Steal E Hit F or Left Mouse Button Sprint Left Shift Upgrade Brainrot Q Player 2 Move Arrow Keys Jump L Buy or Steal O Hit K Sprint J Upgrade Brainrot U Mobile Controls Touch",
+    file: "https://html5.gamemonetize.co/3d46x6qf4gjpq9nn4u1wntkd2a35uor8/",
+    popular: 120,
+    added: "2026-10-14"
+  },
+  {
+    id: "86039",
+    title: "Break a Lucky Egg Brainrots",
+    category: "Arcade",
+    icon: "🥚",
+    thumbnail: "https://img.gamemonetize.com/xnbqyw4bp8wpymivt0cj5nv3lccs6usg/512x384.jpg",
+    description: "Break a Lucky Egg Brainrots is a fast and rewarding collection game where action, risk, and strategy come together. Your mission is to break brainrot eggs, collect rare Brainrot characters, and safely deliver them to your base before time runs out. Each run is a mix of decision making and reflex. That income allows you to unlock stronger pickaxes and hammers, break higher tier eggs, and expand your base up to 3 floors. With full upgrades, you can store up to many Brainrots and build a strong passive economy. The game supports both 1 player and 2 player modes.",
+    instructions: "Player 1: Move W A S D, Run Left Shift, Hit F, Pick Up or Sell E, Jump Space. Player 2: Move Arrow Keys, Run K, Hit J, Pick Up or Sell U, Jump L",
+    file: "https://html5.gamemonetize.co/xnbqyw4bp8wpymivt0cj5nv3lccs6usg/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "86040",
+    title: "Steal An Egg",
+    category: "Action",
+    icon: "🥚",
+    thumbnail: "https://img.gamemonetize.com/vom1cpvqc5j9mgzv1irmr870gllztzgk/512x384.jpg",
+    description: "Steal An Egg takes the classic Steal Brainrot loop and flips it into an egg-hatching economy race. Play in 1 Player or 2 Player mode, buy mystery eggs from the center conveyor, carry them back to your base, and wait for them to hatch into random Brainrot characters! The better your lineup, the faster you generate coins, and the sooner you can afford the rarest eggs.",
+    instructions: "PLAYER 1: Move W A S D, Jump Space, Buy or Steal E, Hit F or Left Mouse, Sprint Left Shift. PLAYER 2: Move Arrow Keys, Jump L, Buy or Steal O, Hit K, Sprint J",
+    file: "https://html5.gamemonetize.co/vom1cpvqc5j9mgzv1irmr870gllztzgk/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "86552",
+    title: "Obby Highest Jump Ever",
+    category: "Arcade",
+    icon: "🚀",
+    thumbnail: "https://img.gamemonetize.com/013okql8w85qvv4ryz32yhm2g7oj523m/512x384.jpg",
+    description: "Obby Highest Jump Ever is a click-based jumping and climbing game where every click makes you stronger. Start from a small 10M building and push your way up to massive 2500M towers as your jump power grows step by step. Each new height feels like a new milestone, and every rooftop trophy proves you earned it. Your goal is simple: jump higher, reach the top, and collect trophies. The higher the building, the bigger the reward.",
+    instructions: "Movement W A S D or Arrow Keys, Jump Space, Boost Jump Power Mouse Click or N, Sprint Left Shift, Auto Clicker Q, Daily Quests G, Rebirth T, Pet Inventory Z, Switch to 2P H",
+    file: "https://html5.gamemonetize.co/013okql8w85qvv4ryz32yhm2g7oj523m/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "86585",
+    title: "Draw to Help",
+    category: "Puzzle",
+    icon: "✏️",
+    thumbnail: "https://img.gamemonetize.com/qd5p77bvsyubd2b3cu475u6rqkesl1ct/512x384.jpg",
+    description: "What would you draw to help a hungry dog or a cat caught in the rain? Draw to Help is a fun puzzle game where every picture tells a little story. Figure out whats missing, draw the solution with your finger, and watch the characters react! GAME FEATURES: Fun drawing puzzles with simple controls. Cute characters and funny situations. Charming hand-drawn illustrations. Creative challenges that make you think. Helpful hints when you get stuck. No drawing skills required. Just think, draw, and have fun!",
+    instructions: "Click or Tap and drag to draw",
+    file: "https://html5.gamemonetize.co/qd5p77bvsyubd2b3cu475u6rqkesl1ct/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "88069",
+    title: "People Blaster",
+    category: "Boys",
+    icon: "🔫",
+    thumbnail: "https://img.gamemonetize.com/ebnq54fc336mgcz8uifwrqdvl85w3yaw/512x384.jpg",
+    description: "Crowd Gun 3D is a fast-paced runner where you recruit stickmen along the track to transform them into powerful weapons. Pass through multipliers, dodge deadly city obstacles, and unleash a barrage of gunfire to blast through targets and reach the finish line!",
+    instructions: "Mouse click or tap to play",
+    file: "https://html5.gamemonetize.co/ebnq54fc336mgcz8uifwrqdvl85w3yaw/",
+    popular: 100,
+    added: "2026-10-15"
+   },
+   {
+    id: "87443",
+    title: "EmberCraft",
+    category: "Adventure",
+    icon: "⛏️",
+    thumbnail: "https://img.gamemonetize.com/8g97q606eaku8sq2vetmo0xhho4vqpux/512x384.jpg",
+    description: "EmberCraft is a colorful 3D sandbox adventure in a block world. Explore varied terrain, build your own creations, and shape your journey at your own pace. The game is designed for desktop, tablet, and mobile browsers. On a phone, rotate to landscape for the best view.",
+    instructions: "Desktop WASD to move and Space to jump. Mobile and tablet use the on-screen touch controls. Rotate your device to landscape for the best view",
+    file: "https://html5.gamemonetize.co/8g97q606eaku8sq2vetmo0xhho4vqpux/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "87248",
+    title: "+1 Cut Grass Adventure",
+    category: "Adventure",
+    icon: "🚜",
+    thumbnail: "https://img.gamemonetize.com/aafq217bqi3jbg0q7yacv2lj8i0av6i4/512x384.jpg",
+    description: "Control your lawn mower and clear the green fields as you progress! Earn money by mowing grass, upgrade your machine, and clean larger areas faster. Use your earnings to increase your capacity, speed, and mowing power, making your machine much more efficient. Unlock new areas, explore different environments, and mow as much grass as possible to grow your fortune. With simple controls, relaxing gameplay, and a rewarding progression system, this fun mowing adventure is perfect for enjoying even during short breaks. The more grass you mow, the faster you progress and the larger areas you can clear!",
+    instructions: "Move using WASD or the Arrow Keys, Press Space to jump. On mobile tap the screen to mow grass faster. Mobile-friendly controls are available for a smooth gameplay experience on touch devices",
+    file: "https://html5.gamemonetize.co/aafq217bqi3jbg0q7yacv2lj8i0av6i4/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "88447",
+    title: "Curve Free Kick",
+    category: "Action",
+    icon: "⚽",
+    thumbnail: "https://img.gamemonetize.com/cqc4yfi4ntkoiojaw96r7g0zds1v1nwe/512x384.jpg",
+    description: "Curve Free Kick is a 3D free kick game with realistic ball physics. Move your player behind the ball and choose your run-up: the wider the angle, the more the ball curves, and the longer the run-up, the harder the shot. Bend the ball around the wall, use the wind and beat the goalkeeper. The wind blows from the left or right on every level and pushes the ball in the air.",
+    instructions: "Desktop: Move the mouse to position your player, click to shoot (Space also shoots). Mobile: Drag to position your player, tap the SHOOT button",
+    file: "https://html5.gamemonetize.co/cqc4yfi4ntkoiojaw96r7g0zds1v1nwe/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "87619",
+    title: "Verity Block Survival",
+    category: "Action",
+    icon: "⛏️",
+    thumbnail: "https://img.gamemonetize.com/7uxzjz6xhuaa25oajcpcj2d0thdzf101/512x384.jpg",
+    description: "Enter a mysterious block-based world where survival is your only goal! Explore a dark and dangerous environment, gather resources, craft useful items, and build a safe place to survive. But be careful—strange creatures and unexpected dangers may appear when you least expect them. Explore abandoned areas, discover hidden secrets, and find a way to survive the night.",
+    instructions: "Move using the WASD keys, Use Left Mouse Click to attack with your sword, Press Space to jump. The game is also fully playable on mobile devices with mobile-friendly controls",
+    file: "https://html5.gamemonetize.co/7uxzjz6xhuaa25oajcpcj2d0thdzf101/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "87089",
+    title: "Geometry Vibes 3D",
+    category: "Action",
+    icon: "🟦",
+    thumbnail: "https://img.gamemonetize.com/ox5p3fwowh0194lbvgxqr5u29d6ba8ja/512x384.jpg",
+    description: "Geometry Vibes 3D takes everything you loved about the original Geometry Vibes and brings it into a vibrant, dynamic 3D world. With fully reimagined levels and stunning new visuals, this version elevates your reflexes and rhythm-based skills to new dimensions.",
+    instructions: "Player 1: W, Left Mouse Click or Spacebar. Player 2: Up Arrow Key. Mobile: Tap anywhere on the screen to jump",
+    file: "https://html5.gamemonetize.co/ox5p3fwowh0194lbvgxqr5u29d6ba8ja/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+    id: "87252",
+    title: "Keyboard Escape Block Speed +1",
+    category: "Action",
+    icon: "⌨️",
+    thumbnail: "https://img.gamemonetize.com/jl2hv35oc2renl907jq79f8zc3h15e4p/512x384.jpg",
+    description: "Ready to test your reflexes while running across giant keyboards? Press the correct keys, increase your speed, and survive as long as possible without falling! Stay focused, time your movements carefully, and complete challenging courses. As you progress, the game gets faster and the obstacles become more difficult.",
+    instructions: "Move using the WASD keys. The game is also playable on mobile devices with mobile-friendly controls available",
+    file: "https://html5.gamemonetize.co/jl2hv35oc2renl907jq79f8zc3h15e4p/",
+    popular: 100,
+    added: "2026-10-15"
+  },
+  {
+  id: "83736",
+  title: "Obby Climb and Jump Tower",
+  category: "Adventure",
+  icon: "🏰",
+  thumbnail: "https://img.gamemonetize.com/yhbdv0mw8rybnzzke2mcu32sjd6xvtgu/512x384.jpg",
+  description: "Ready to climb as high as you can? Overcome challenging obstacles, jump from platform to platform, and try to reach the top of the tower! Get your wings, collect cute pets, and climb higher without falling.",
+  instructions: "Move with WASD and jump with Space. Playable on mobile and PC; mobile touch controls are available.",
+  file: "https://html5.gamemonetize.co/yhbdv0mw8rybnzzke2mcu32sjd6xvtgu/",
+  popular: 100,
+  added: "2026-10-15"
+  },
+  
+
+ 
+
+];
+
+const select = s => document.querySelector(s);
+const grid = select("#grid");
+const search = select("#search");
+const modal = select("#modal");
+const frame = select("#frame");
+let category = "All";
+let blobURL = null;
+
+function esc(s){
+  return String(s || "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function render(){
+  const q = search.value.trim().toLowerCase();
+  let list = GAMES.filter(g =>
+    (category === "All" || g.category === category) &&
+    [g.title, g.category, g.description, g.instructions].join(" ").toLowerCase().includes(q)
+  );
+
+  const sortVal = select("#sort").value;
+  if (sortVal === "az") list.sort((a,b) => a.title.localeCompare(b.title));
+  else if (sortVal === "new") list.sort((a,b) => (b.added || "").localeCompare(a.added || ""));
+  else list.sort((a,b) => (b.popular || 0) - (a.popular || 0));
+
+  select("#heading").textContent = category === "All" ? "Mashhur o‘yinlar" : category;
+  select("#count").textContent = `${list.length} ta o‘yin`;
+  select("#empty").hidden = list.length !== 0;
+  grid.hidden = list.length === 0;
+
+  grid.innerHTML = list.map(g => `
+    <button class="game" data-id="${esc(g.id)}">
+      <div class="cover">
+        <span class="emoji">${esc(g.icon || "🎮")}</span>
+        ${g.thumbnail ? `<img loading="lazy" src="${esc(g.thumbnail)}" alt="${esc(g.title)}" onerror="this.remove()">` : ""}
+      </div>
+      <h3>${esc(g.title)}</h3>
+      <p>${esc(g.category)}</p>
+    </button>
+  `).join("");
+}
+
+function openGame(g){
+  let url = g.file;
+  const sep = url.includes("?") ? "&" : "?";
+  url = url + sep + "pubid=" + MY_PUBLISHER_ID;
+
+  if (blobURL) URL.revokeObjectURL(blobURL);
+  blobURL = url.startsWith("blob:") ? url : null;
+
+  select("#gameName").textContent = g.title;
+  select("#infoTitle").textContent = g.title;
+  select("#infoDesc").textContent = g.description || "";
+  select("#infoIns").textContent = g.instructions || "";
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  frame.src = url;
+  history.replaceState(null, "", "#game-" + encodeURIComponent(g.id));
+}
+
+function closeGame(){
+  modal.hidden = true;
+  frame.src = "about:blank";
+  document.body.style.overflow = "";
+  if (blobURL) { URL.revokeObjectURL(blobURL); blobURL = null; }
+  if (location.hash.startsWith("#game-")) history.replaceState(null, "", location.pathname + location.search);
+}
+
+grid.addEventListener("click", e => {
+  const b = e.target.closest("[data-id]");
+  if (!b) return;
+  const g = GAMES.find(x => x.id === b.dataset.id);
+  if (g) openGame(g);
+});
+
+search.addEventListener("input", render);
+select("#sort").addEventListener("change", render);
+
+select("#categories").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]");
+  if (!b) return;
+  category = b.dataset.cat;
+  document.querySelectorAll(".cat").forEach(x => x.classList.toggle("active", x === b));
+  render();
+});
+
+select("#back").onclick = closeGame;
+select("#close").onclick = closeGame;
+select("#full").onclick = async () => {
+  try{
+    if (!document.fullscreenElement) await frame.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch {
+    alert("Fullscreen ishlamadi");
+  }
+};
+
+select("#home").onclick = e => {
+  e.preventDefault();
+  closeGame();
+  category = "All";
+  search.value = "";
+  document.querySelectorAll(".cat").forEach(x => x.classList.toggle("active", x.dataset.cat === "All"));
+  render();
+  window.scrollTo(0,0);
+};
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !modal.hidden) closeGame();
+});
+
+select("#year").textContent = new Date().getFullYear();
+render();
+</script>
+</body>
+</html>
